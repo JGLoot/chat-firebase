@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Chat em Tempo Real</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f0f0f0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+    }
+    #chat {
+      width: 400px;
+      background: #fff;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0px 0px 10px rgba(0,0,0,0.2);
+      display: flex;
+      flex-direction: column;
+    }
+    #messages {
+      flex: 1;
+      height: 300px;
+      overflow-y: auto;
+      border: 1px solid #ddd;
+      padding: 10px;
+      margin-bottom: 10px;
+      border-radius: 5px;
+      background: #fafafa;
+    }
+    #inputContainer {
+      display: flex;
+    }
+    #input {
+      flex: 1;
+      padding: 8px;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+    }
+    #send {
+      padding: 8px 12px;
+      margin-left: 5px;
+      border-radius: 5px;
+      border: none;
+      background: #007bff;
+      color: #fff;
+      cursor: pointer;
+    }
+    #send:hover {
+      background: #0056b3;
+    }
+  </style>
+</head>
+<body>
+  <div id="chat">
+    <h2>Chat em Tempo Real</h2>
+    <div id="messages"></div>
+    <div id="inputContainer">
+      <input id="input" type="text" placeholder="Digite sua mensagem...">
+      <button id="send">Enviar</button>
+    </div>
+  </div>
+
+  <!-- Firebase v12+ via Module -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-app.js";
+    import { getDatabase, ref, push, onChildAdded } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-database.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyD98rTzp-9eXIuK9WzjnssCPoQnLqixX8Y",
+      authDomain: "chat-e4692.firebaseapp.com",
+      databaseURL: "https://chat-e4692-default-rtdb.firebaseio.com",
+      projectId: "chat-e4692",
+      storageBucket: "chat-e4692.firebasestorage.app",
+      messagingSenderId: "1003332521890",
+      appId: "1:1003332521890:web:0c8f04bb5a60ca9b536cfb"
+    };
+
+    // Inicializa Firebase
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+    const messagesRef = ref(db, "messages");
+
+    const box = document.getElementById("messages");
+    const input = document.getElementById("input");
+    const btn = document.getElementById("send");
+
+    // Recebe mensagens em tempo real
+    onChildAdded(messagesRef, snapshot => {
+      const msg = snapshot.val();
+      const div = document.createElement("div");
+      div.textContent = msg;
+      box.appendChild(div);
+      box.scrollTop = box.scrollHeight;
+    });
+
+    // Envia mensagem
+    function sendMessage() {
+      const text = input.value.trim();
+      if (!text) return;
+      push(messagesRef, text);
+      input.value = "";
+    }
+
+    btn.onclick = sendMessage;
+    input.addEventListener("keypress", e => {
+      if (e.key === "Enter") sendMessage();
+    });
+  </script>
+</body>
+</html>
