@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
-  <title>Chat em Tempo Real</title>
+  <title>Chat com Nome de Usuário</title>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -34,9 +34,17 @@
     }
     #inputContainer {
       display: flex;
+      margin-bottom: 10px;
+    }
+    #username {
+      flex: 1;
+      padding: 8px;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+      margin-right: 5px;
     }
     #input {
-      flex: 1;
+      flex: 2;
       padding: 8px;
       border-radius: 5px;
       border: 1px solid #ccc;
@@ -53,6 +61,13 @@
     #send:hover {
       background: #0056b3;
     }
+    .message {
+      margin-bottom: 5px;
+    }
+    .user {
+      font-weight: bold;
+      margin-right: 5px;
+    }
   </style>
 </head>
 <body>
@@ -60,12 +75,12 @@
     <h2>Chat em Tempo Real</h2>
     <div id="messages"></div>
     <div id="inputContainer">
+      <input id="username" type="text" placeholder="Seu nome">
       <input id="input" type="text" placeholder="Digite sua mensagem...">
       <button id="send">Enviar</button>
     </div>
   </div>
 
-  <!-- Firebase v12+ via Module -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-app.js";
     import { getDatabase, ref, push, onChildAdded } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-database.js";
@@ -80,20 +95,21 @@
       appId: "1:1003332521890:web:0c8f04bb5a60ca9b536cfb"
     };
 
-    // Inicializa Firebase
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
     const messagesRef = ref(db, "messages");
 
     const box = document.getElementById("messages");
     const input = document.getElementById("input");
+    const username = document.getElementById("username");
     const btn = document.getElementById("send");
 
     // Recebe mensagens em tempo real
     onChildAdded(messagesRef, snapshot => {
-      const msg = snapshot.val();
+      const data = snapshot.val();
       const div = document.createElement("div");
-      div.textContent = msg;
+      div.classList.add("message");
+      div.innerHTML = `<span class="user">${data.user}:</span> ${data.text}`;
       box.appendChild(div);
       box.scrollTop = box.scrollHeight;
     });
@@ -101,8 +117,9 @@
     // Envia mensagem
     function sendMessage() {
       const text = input.value.trim();
+      const user = username.value.trim() || "Anon";
       if (!text) return;
-      push(messagesRef, text);
+      push(messagesRef, { user, text });
       input.value = "";
     }
 
