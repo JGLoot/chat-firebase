@@ -2,11 +2,11 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
-  <title>Chat com Nome de Usuário</title>
+  <title>Chat Estilo WhatsApp</title>
   <style>
     body {
       font-family: Arial, sans-serif;
-      background: #f0f0f0;
+      background: #e5ddd5;
       display: flex;
       justify-content: center;
       align-items: center;
@@ -15,67 +15,82 @@
     }
     #chat {
       width: 400px;
-      background: #fff;
-      padding: 20px;
+      max-height: 600px;
+      background: #f0f0f0;
+      padding: 10px;
       border-radius: 10px;
-      box-shadow: 0px 0px 10px rgba(0,0,0,0.2);
       display: flex;
       flex-direction: column;
+      box-shadow: 0px 0px 15px rgba(0,0,0,0.2);
     }
     #messages {
       flex: 1;
-      height: 300px;
       overflow-y: auto;
-      border: 1px solid #ddd;
       padding: 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      scroll-behavior: smooth;
       margin-bottom: 10px;
-      border-radius: 5px;
-      background: #fafafa;
+    }
+    .message {
+      max-width: 70%;
+      padding: 8px 12px;
+      border-radius: 15px;
+      position: relative;
+      word-wrap: break-word;
+    }
+    .message .user {
+      font-weight: bold;
+      display: block;
+      margin-bottom: 3px;
+      font-size: 0.85em;
+      color: #555;
+    }
+    .self {
+      align-self: flex-end;
+      background: #dcf8c6;
+    }
+    .other {
+      align-self: flex-start;
+      background: #fff;
     }
     #inputContainer {
       display: flex;
-      margin-bottom: 10px;
+      gap: 5px;
     }
     #username {
-      flex: 1;
+      width: 80px;
       padding: 8px;
-      border-radius: 5px;
+      border-radius: 20px;
       border: 1px solid #ccc;
-      margin-right: 5px;
     }
     #input {
-      flex: 2;
+      flex: 1;
       padding: 8px;
-      border-radius: 5px;
+      border-radius: 20px;
       border: 1px solid #ccc;
     }
     #send {
-      padding: 8px 12px;
-      margin-left: 5px;
-      border-radius: 5px;
+      padding: 8px 15px;
+      border-radius: 20px;
       border: none;
-      background: #007bff;
+      background: #128c7e;
       color: #fff;
+      font-weight: bold;
       cursor: pointer;
+      transition: background 0.2s;
     }
     #send:hover {
-      background: #0056b3;
-    }
-    .message {
-      margin-bottom: 5px;
-    }
-    .user {
-      font-weight: bold;
-      margin-right: 5px;
+      background: #075e54;
     }
   </style>
 </head>
 <body>
   <div id="chat">
-    <h2>Chat em Tempo Real</h2>
     <div id="messages"></div>
     <div id="inputContainer">
-      <input id="username" type="text" placeholder="Seu nome">
+      <input id="username" type="text" placeholder="Nome">
       <input id="input" type="text" placeholder="Digite sua mensagem...">
       <button id="send">Enviar</button>
     </div>
@@ -104,22 +119,30 @@
     const username = document.getElementById("username");
     const btn = document.getElementById("send");
 
+    const myName = () => username.value.trim() || "Anon";
+
     // Recebe mensagens em tempo real
     onChildAdded(messagesRef, snapshot => {
       const data = snapshot.val();
       const div = document.createElement("div");
       div.classList.add("message");
-      div.innerHTML = `<span class="user">${data.user}:</span> ${data.text}`;
+
+      // Estilo de bolha
+      if (data.user === myName()) {
+        div.classList.add("self");
+      } else {
+        div.classList.add("other");
+      }
+
+      div.innerHTML = `<span class="user">${data.user}</span>${data.text}`;
       box.appendChild(div);
       box.scrollTop = box.scrollHeight;
     });
 
-    // Envia mensagem
     function sendMessage() {
       const text = input.value.trim();
-      const user = username.value.trim() || "Anon";
       if (!text) return;
-      push(messagesRef, { user, text });
+      push(messagesRef, { user: myName(), text });
       input.value = "";
     }
 
